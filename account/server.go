@@ -10,10 +10,15 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/dantin/microservice-go/account/dbclient"
 )
 
 var (
 	healthy int32
+
+	// DBClient is a client of database.
+	DBClient dbclient.IBoltClient
 )
 
 // Server implements HTTP server.
@@ -21,11 +26,19 @@ type Server struct {
 	server *http.Server
 }
 
+// initBoltClient creates instance and calls the OpenBoltDB and Seed funcs.
+func initBoltClient() {
+	DBClient = &dbclient.BoltClient{}
+	DBClient.OpenBoltDB()
+	DBClient.Seed()
+}
+
 // NewServer creates a new instance of HTTP server.
 func NewServer(addr string) *Server {
 	// build default logger.
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
+	initBoltClient()
 	handler := newRouter(logger)
 
 	return &Server{
