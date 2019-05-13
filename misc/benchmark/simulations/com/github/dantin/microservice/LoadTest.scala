@@ -8,8 +8,10 @@ import io.gatling.jdbc.Predef._
 
 class LoadTest extends Simulation {
   setUp(
-    Scenarios.scn_Browser.inject(
-      rampUsers(Conf.users) duration (10 seconds)).protocols(
+    Scenarios.scn_Browser
+      .inject(
+        rampUsers(Conf.users) during (Scenario.rampUpTimeSec seconds))
+      .protocols(
         Conf.httpConf)
     )
 }
