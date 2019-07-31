@@ -1,12 +1,10 @@
 package account
 
 import (
-	"log"
-
 	"github.com/gorilla/mux"
 )
 
-func newRouter(logger *log.Logger) *mux.Router {
+func newRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	for _, route := range routes {

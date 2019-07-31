@@ -3,7 +3,6 @@ package account
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -35,16 +34,12 @@ func initBoltClient() {
 
 // NewServer creates a new instance of HTTP server.
 func NewServer(addr string) *Server {
-	// build default logger.
-	logger := log.New(os.Stdout, "", log.LstdFlags)
-
 	initBoltClient()
-	handler := newRouter(logger)
+	handler := newRouter()
 
 	return &Server{
 		server: &http.Server{
 			Addr:           addr,
-			ErrorLog:       logger,
 			Handler:        handler,
 			ReadTimeout:    5 * time.Second,
 			WriteTimeout:   10 * time.Second,
