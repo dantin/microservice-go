@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	app := account.NewServer(":30000")
+	app := account.NewServer(":6767")
 
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
