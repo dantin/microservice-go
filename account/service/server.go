@@ -1,4 +1,4 @@
-package account
+package service
 
 import (
 	"context"
@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/dantin/microservice-go/account/dbclient"
+	"github.com/dantin/microservice-go/pkg/logutil"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -34,6 +36,8 @@ func initBoltClient() {
 
 // NewServer creates a new instance of HTTP server.
 func NewServer(addr string) *Server {
+	// init logger.
+	logutil.InitLogger(&logutil.LogConfig{Level: "debug", File: logutil.FileLogConfig{}})
 	initBoltClient()
 	handler := newRouter()
 
@@ -68,7 +72,7 @@ func (s *Server) Run() error {
 	go func() {
 		sig := <-sc
 		fmt.Printf("got signal [%d] to exit.\n", sig)
-		s.server.ErrorLog.Printf("%s - Shutdown signal received...\n", hostname)
+		log.Infof("%s - Shutdown signal received...", hostname)
 		atomic.StoreInt32(&healthy, 0)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -76,19 +80,19 @@ func (s *Server) Run() error {
 
 		s.server.SetKeepAlivesEnabled(false)
 		if err := s.server.Shutdown(ctx); err != nil {
-			s.server.ErrorLog.Fatalf("Could not gracefully shutdown the server: %v\n", err)
+			log.Fatalf("Could not gracefully shutdown the server: %v", err)
 		}
 		close(done)
 	}()
 
-	s.server.ErrorLog.Printf("%s - Start server on port %v\n", hostname, s.server.Addr)
+	log.Infof("%s - Start server on port %v", hostname, s.server.Addr)
 	atomic.StoreInt32(&healthy, 1)
 	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		s.server.ErrorLog.Fatalf("Could not listen on %s: %v\n", s.server.Addr, err)
+		log.Fatalf("Could not listen on %s: %v", s.server.Addr, err)
 	}
 
 	<-done
-	s.server.ErrorLog.Fatalf("%s - Server gracefully stopped.\n", hostname)
+	log.Fatalf("%s - Server gracefully stopped", hostname)
 
 	return nil
 }

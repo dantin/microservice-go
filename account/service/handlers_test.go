@@ -1,4 +1,4 @@
-package account
+package service
 
 import (
 	"net/http/httptest"
